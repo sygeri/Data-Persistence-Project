@@ -12,16 +12,20 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public GameObject GameOverText;
+    public Text BestScoreText;
     
     private bool m_Started = false;
     private int m_Points;
     
     private bool m_GameOver = false;
 
+    private Serializer serializer;
+
     
     // Start is called before the first frame update
     void Start()
     {
+        serializer = GameObject.Find("Serializer").GetComponent<Serializer>();
         const float step = 0.6f;
         int perLine = Mathf.FloorToInt(4.0f / step);
         
@@ -35,6 +39,14 @@ public class MainManager : MonoBehaviour
                 brick.PointValue = pointCountArray[i];
                 brick.onDestroyed.AddListener(AddPoint);
             }
+        }
+        if (serializer.highScores.scoreList.Count == 0)
+        {
+            BestScoreText.text = "Best Score : " + "-" + " : " + "-";
+        }
+        else
+        {
+            BestScoreText.text = "Best Score : " + serializer.highScores.scoreList[0].playerName + " : " + serializer.highScores.scoreList[0].playerHighScore;
         }
     }
 
@@ -59,6 +71,10 @@ public class MainManager : MonoBehaviour
             {
                 SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
+            else if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                SceneManager.LoadScene(0);
+            }
         }
     }
 
@@ -72,5 +88,8 @@ public class MainManager : MonoBehaviour
     {
         m_GameOver = true;
         GameOverText.SetActive(true);
+        serializer.CurrentPlayerScore = m_Points;
+        serializer.SaveHighScores();
+        BestScoreText.text = "Best Score : " + serializer.highScores.scoreList[0].playerName + " : " + serializer.highScores.scoreList[0].playerHighScore;
     }
 }
